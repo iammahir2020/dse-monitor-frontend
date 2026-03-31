@@ -8,8 +8,8 @@ const configuredLocalApiUrl = import.meta.env.VITE_LOCAL_API_URL?.trim() || DEFA
 const apiTarget = import.meta.env.VITE_API_TARGET?.trim().toLowerCase();
 
 const RAW_BASE_URL =
-  configuredApiUrl ||
-  (apiTarget === 'local' ? configuredLocalApiUrl : DEFAULT_LIVE_API_URL);
+//   configuredApiUrl ||
+  (apiTarget === 'local' ? configuredLocalApiUrl : configuredApiUrl);
 const AUTH_TOKEN_KEY = 'dse_auth_token';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');

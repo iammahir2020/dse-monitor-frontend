@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
-import { Bell, Bot, ChartLine, LogOut, Settings, Siren } from 'lucide-react';
+import { Bell, Bot, ChartLine, Eye, LogOut, Newspaper, Settings, Siren } from 'lucide-react';
 import './App.css';
 import AuthPage from './components/AuthPage';
 import NotificationCenter from './components/NotificationCenter';
@@ -67,9 +67,9 @@ function ProtectedLayout({
             <Siren size={16} />
             Alerts
           </NavLink>
-          <NavLink to="/watchlist">Watchlist</NavLink>
-          <NavLink to="/portfolio">Portfolio</NavLink>
-          <NavLink to="/sentiment">Sentiment</NavLink>
+          <NavLink to="/watchlist"><Eye size={16} /> Watchlist</NavLink>
+          <NavLink to="/portfolio"><ChartLine size={16} /> Portfolio</NavLink>
+          <NavLink to="/sentiment"><Newspaper size={16} /> Sentiment</NavLink>
           <NavLink to="/notifications" className="app-shell__nav-badge">
             <Bell size={16} />
             Notifications
