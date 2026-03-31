@@ -1,0 +1,130 @@
+.alerts-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alerts-page__header {
+  align-items: flex-start;
+}
+
+.alerts-page__subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.alerts-page__error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 152, 173, 0.45);
+  color: #ffd4df;
+  background: rgba(130, 32, 58, 0.25);
+}
+
+.alerts-page__grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.alerts-page__form,
+.alerts-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: rgba(13, 24, 41, 0.62);
+}
+
+.alerts-page__form h3,
+.alerts-page__list h3 {
+  margin: 0;
+}
+
+.alerts-page__form label {
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+.alerts-page__form input,
+.alerts-page__form select,
+.alerts-page__item-info input,
+.alerts-page__item-info select {
+  width: 100%;
+  min-width: 0;
+}
+
+.alerts-page__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.alerts-page__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(121, 178, 247, 0.16);
+  border-radius: 10px;
+  background: rgba(16, 30, 49, 0.6);
+}
+
+.alerts-page__item-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.alerts-page__item-info strong {
+  color: var(--text-main);
+}
+
+.alerts-page__item-info span {
+  color: var(--text-dim);
+  text-transform: capitalize;
+}
+
+.alerts-page__item-actions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.alerts-page__empty {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+@media (max-width: 940px) {
+  .alerts-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .alerts-page {
+    gap: 0.8rem;
+  }
+
+  .alerts-page__form,
+  .alerts-page__list {
+    padding: 0.75rem;
+  }
+
+  .alerts-page__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .alerts-page__item-actions {
+    justify-content: flex-end;
+  }
+}

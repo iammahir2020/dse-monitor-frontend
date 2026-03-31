@@ -1,0 +1,173 @@
+.market-sentiment {
+  background: linear-gradient(165deg, rgba(12, 22, 37, 0.78), rgba(19, 33, 54, 0.78));
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  animation: slideDown 0.4s ease;
+  box-shadow: var(--shadow-soft);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sentiment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sentiment-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #68deb9 0%, #88bdff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sentiment-refresh {
+  background: rgba(28, 58, 92, 0.6);
+  border: 1px solid rgba(123, 182, 248, 0.34);
+  color: #c6e3ff;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.sentiment-refresh:hover {
+  background: rgba(38, 76, 118, 0.78);
+}
+
+.sentiment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.72rem;
+  margin-bottom: 1rem;
+}
+
+.sentiment-card {
+  background: rgba(13, 25, 42, 0.74);
+  border: 1px solid rgba(123, 177, 246, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  text-align: center;
+}
+
+.sentiment-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.sentiment-value {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.sentiment-value.advance {
+  color: #6fddb6;
+}
+
+.sentiment-value.decline {
+  color: #ff90a6;
+}
+
+.sentiment-value.neutral {
+  color: var(--text-muted);
+}
+
+.sentiment-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.movers-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.72rem;
+}
+
+.movers-group h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.movers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mover-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(13, 25, 42, 0.74);
+  padding: 0.7rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid;
+}
+
+.mover-item.gain {
+  border-left-color: #6fddb6;
+}
+
+.mover-item.loss {
+  border-left-color: #ff90a6;
+}
+
+.mover-symbol {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.mover-change {
+  font-weight: 600;
+}
+
+.mover-item.gain .mover-change {
+  color: #6fddb6;
+}
+
+.mover-item.loss .mover-change {
+  color: #ff90a6;
+}
+
+@media (max-width: 768px) {
+  .movers-section {
+    grid-template-columns: 1fr;
+  }
+
+  .sentiment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .market-sentiment {
+    padding: 0.9rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .sentiment-grid {
+    grid-template-columns: 1fr;
+  }
+}
