@@ -1,6 +1,15 @@
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-const RAW_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.108:5000';
+const DEFAULT_LIVE_API_URL = 'https://dse-monitor-backend.onrender.com/api';
+const DEFAULT_LOCAL_API_URL = 'http://localhost:5000/api';
+
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const configuredLocalApiUrl = import.meta.env.VITE_LOCAL_API_URL?.trim() || DEFAULT_LOCAL_API_URL;
+const apiTarget = import.meta.env.VITE_API_TARGET?.trim().toLowerCase();
+
+const RAW_BASE_URL =
+  configuredApiUrl ||
+  (apiTarget === 'local' ? configuredLocalApiUrl : DEFAULT_LIVE_API_URL);
 const AUTH_TOKEN_KEY = 'dse_auth_token';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
