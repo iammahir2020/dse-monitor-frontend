@@ -299,6 +299,17 @@ export interface Phase12DepthMonitorState {
   lastDepthStats: Record<string, unknown>;
 }
 
+export interface Phase12AlertMonitorState {
+  alertMonitor: {
+    configuredEnabled: boolean;
+    runtimeEnabled: boolean;
+    effectiveEnabled: boolean;
+    intervalActive: boolean;
+    isMonitoring: boolean;
+    persistedEnabled: boolean;
+  };
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -512,5 +523,10 @@ export const getPhase12DepthMonitor = () => api.get<Phase12DepthMonitorState>('/
 
 export const updatePhase12DepthMonitor = (enabled: boolean) =>
   api.patch<Phase12DepthMonitorState>('/phase12/depth-monitor', { enabled });
+
+export const getPhase12AlertMonitor = () => api.get<Phase12AlertMonitorState>('/phase12/alert-monitor');
+
+export const updatePhase12AlertMonitor = (enabled: boolean) =>
+  api.patch<Phase12AlertMonitorState>('/phase12/alert-monitor', { enabled });
 
 export default api;
