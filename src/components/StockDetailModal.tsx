@@ -111,8 +111,28 @@ export default function StockDetailModal({ symbol, isOpen, onClose }: StockDetai
                 </div>
               </div>
 
-              <div className="stock-detail__history">
-                <p className="history-empty">Historical price data is not available.</p>
+              <div className="stock-detail__range">
+                <h4 className="stock-detail__range-label">Today's Range</h4>
+                <div className="stock-detail__range-bar-wrap">
+                  <span className="stock-detail__range-bound">{formatNumber(stock.low)}</span>
+                  <div className="stock-detail__range-track">
+                    {(() => {
+                      const span = stock.high - stock.low;
+                      const pct = span > 0 ? ((stock.ltp - stock.low) / span) * 100 : 50;
+                      return (
+                        <span
+                          className="stock-detail__range-marker"
+                          style={{ left: `${Math.min(100, Math.max(0, pct))}%` }}
+                          title={`LTP: ${formatNumber(stock.ltp)}`}
+                        />
+                      );
+                    })()}
+                  </div>
+                  <span className="stock-detail__range-bound">{formatNumber(stock.high)}</span>
+                </div>
+                <p className="stock-detail__range-hint">
+                  Historical tick data is not available. Range uses today's live high/low.
+                </p>
               </div>
             </>
           ) : null}

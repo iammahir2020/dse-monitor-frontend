@@ -7,9 +7,7 @@ const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const configuredLocalApiUrl = import.meta.env.VITE_LOCAL_API_URL?.trim() || DEFAULT_LOCAL_API_URL;
 const apiTarget = import.meta.env.VITE_API_TARGET?.trim().toLowerCase();
 
-const RAW_BASE_URL =
-//   configuredApiUrl ||
-  (apiTarget === 'local' ? configuredLocalApiUrl : configuredApiUrl);
+const RAW_BASE_URL = apiTarget === 'local' ? configuredLocalApiUrl : configuredApiUrl || DEFAULT_LIVE_API_URL;
 const AUTH_TOKEN_KEY = 'dse_auth_token';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
@@ -39,6 +37,10 @@ export interface NotificationSettings {
   fixedVolumeThreshold: number | null;
   relativeVolumeMultiplier: number;
   relativeVolumeLookbackDays: number;
+  depthPressureAlertsEnabled: boolean;
+  depthPressureThreshold: number;
+  signalPulseAlertsEnabled: boolean;
+  signalPulseTimeframe: string;
 }
 
 export interface AuthUser {
@@ -165,7 +167,14 @@ export type NotificationStatus = 'unread' | 'read' | 'archived';
 export interface NotificationItem {
   id: string;
   userPhoneNumber: string;
-  type: 'alert_triggered' | 'high_volume_trade' | 'relative_volume_trade' | 'entry_signal' | 'system';
+  type:
+    | 'alert_triggered'
+    | 'high_volume_trade'
+    | 'relative_volume_trade'
+    | 'entry_signal'
+    | 'order_book_pressure'
+    | 'signal_pulse'
+    | 'system';
   source: string;
   symbol?: string;
   title: string;
@@ -219,6 +228,45 @@ export interface VolumeContext {
   recentDays: number;
 }
 
+export interface SignalPulseItem {
+  symbol: string;
+  signal?: string;
+  kind?: string;
+  timeframe?: string;
+  confidence?: string;
+  score?: number;
+  currentPrice?: number;
+  rsi?: number;
+  emaShort?: number;
+  emaLong?: number;
+  snapshotAt?: string;
+  generatedAt?: string;
+  reasons?: string[];
+  cautions?: string[];
+  metrics?: Record<string, unknown>;
+}
+
+export interface SignalPulseResponse {
+  timeframe: string;
+  generatedAt?: string;
+  data: SignalPulseItem[];
+}
+
+export interface DepthPressureSnapshot {
+  symbol: string;
+  buyPressureRatio: number;
+  totalBids: number;
+  totalAsks: number;
+  signal: string;
+  snapshotAt: string;
+  threshold?: number;
+}
+
+export interface DepthPressureResponse {
+  threshold: number;
+  data: DepthPressureSnapshot[];
+}
+
 export interface TelegramStatus {
   linked: boolean;
   telegramUsername: string | null;
@@ -231,6 +279,24 @@ export interface TelegramLinkTokenResponse {
   expiresAt: string;
   botUsername: string;
   deepLinkUrl: string;
+}
+
+export interface Phase12DepthMonitorState {
+  depthMonitor: {
+    configuredEnabled: boolean;
+    runtimeEnabled: boolean;
+    effectiveEnabled: boolean;
+    intervalActive: boolean;
+    persistedEnabled: boolean;
+  };
+  marketWindow: {
+    timezone: string;
+    open: string;
+    close: string;
+    isWithinWindowNow: boolean;
+  };
+  lastDepthCycleAt: string | null;
+  lastDepthStats: Record<string, unknown>;
 }
 
 const api = axios.create({
@@ -431,6 +497,20 @@ export const unlinkTelegram = () => api.delete<{ message: string }>('/telegram/l
 
 export const getEntrySignals = () => api.get<EntrySignalsResponse>('/insights/entry-signals');
 
+export const getSignalPulse = (params?: { symbols?: string; limit?: number }) =>
+  api.get<SignalPulseResponse>('/insights/signal-pulse', { params });
+
 export const getVolumeContext = (symbol: string) => api.get<VolumeContext>(`/insights/volume-context/${symbol}`);
+
+export const getDepthPressure = (params?: { symbols?: string; limit?: number }) =>
+  api.get<DepthPressureResponse>('/market/depth-pressure', { params });
+
+export const getDepthPressureBySymbol = (symbol: string) =>
+  api.get<DepthPressureSnapshot>(`/market/depth-pressure/${encodeURIComponent(symbol)}`);
+
+export const getPhase12DepthMonitor = () => api.get<Phase12DepthMonitorState>('/phase12/depth-monitor');
+
+export const updatePhase12DepthMonitor = (enabled: boolean) =>
+  api.patch<Phase12DepthMonitorState>('/phase12/depth-monitor', { enabled });
 
 export default api;

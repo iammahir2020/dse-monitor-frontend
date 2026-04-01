@@ -328,12 +328,59 @@
   color: var(--text-main);
 }
 
-/* History */
-.stock-detail__history {
+/* Today's Range */
+.stock-detail__range {
   background: rgba(11, 22, 38, 0.68);
   border: 1px solid rgba(124, 176, 245, 0.18);
   border-radius: var(--radius-sm);
   padding: 0.8rem;
+}
+
+.stock-detail__range-label {
+  margin: 0 0 0.65rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stock-detail__range-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stock-detail__range-bound {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stock-detail__range-track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(124, 176, 245, 0.2);
+}
+
+.stock-detail__range-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #5fd3b7;
+  box-shadow: 0 0 6px #5fd3b788;
+  cursor: default;
+}
+
+.stock-detail__range-hint {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .stock-detail__actions {

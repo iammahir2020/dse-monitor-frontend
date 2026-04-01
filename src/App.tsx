@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
-import { Bell, Bot, ChartLine, Eye, LogOut, Newspaper, Settings, Siren } from 'lucide-react';
+import { Activity, Bell, Bot, ChartLine, Eye, LogOut, Newspaper, Settings, Siren } from 'lucide-react';
 import './App.css';
 import AuthPage from './components/AuthPage';
 import NotificationCenter from './components/NotificationCenter';
@@ -11,6 +11,8 @@ import AlertsPage from './components/AlertsPage.tsx';
 import Watchlist from './components/Watchlist';
 import Portfolio from './components/Portfolio';
 import MarketSentiment from './components/MarketSentiment';
+import DepthPressurePanel from './components/DepthPressurePanel';
+import Dashboard from './components/Dashboard';
 import {
   clearAuthToken,
   getAuthToken,
@@ -19,6 +21,7 @@ import {
   getWebSocketUrl,
   logout,
   type AuthUser,
+  type DepthPressureSnapshot,
   type NotificationItem,
 } from './services/api';
 
@@ -49,27 +52,42 @@ function Toasts({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (id: st
 function ProtectedLayout({
   user,
   unreadCount,
+  wsConnected,
   onLogout,
+  onUserUpdate,
 }: {
   user: AuthUser;
   unreadCount: number;
+  wsConnected: boolean;
   onLogout: () => Promise<void>;
+  onUserUpdate: (user: AuthUser) => void;
 }) {
   return (
     <div className="app-shell">
       <header className="app-shell__header">
         <div>
           <h1>DSE Monitor</h1>
-          <p>{user.phoneNumber}</p>
+          <p className="app-shell__phone">
+            {user.phoneNumber}
+            <span className={`ws-status-dot${wsConnected ? ' ws-status-dot--connected' : ''}`} title={wsConnected ? 'Live feed connected' : 'Live feed disconnected'} />
+          </p>
         </div>
         <nav className="app-shell__nav">
+          {/* <NavLink to="/live">
+            <ChartLine size={16} />
+            Live
+          </NavLink> */}
+          <NavLink to="/portfolio"><ChartLine size={16} /> Portfolio</NavLink>
           <NavLink to="/alerts">
             <Siren size={16} />
             Alerts
           </NavLink>
           <NavLink to="/watchlist"><Eye size={16} /> Watchlist</NavLink>
-          <NavLink to="/portfolio"><ChartLine size={16} /> Portfolio</NavLink>
           <NavLink to="/sentiment"><Newspaper size={16} /> Sentiment</NavLink>
+          <NavLink to="/depth-pressure">
+            <Activity size={16} />
+            Depth
+          </NavLink>
           <NavLink to="/notifications" className="app-shell__nav-badge">
             <Bell size={16} />
             Notifications
@@ -96,15 +114,17 @@ function ProtectedLayout({
 
       <main className="app-shell__main">
         <Routes>
+          {/* <Route path="/live" element={<Dashboard />} /> */}
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/sentiment" element={<MarketSentiment />} />
+          <Route path="/depth-pressure" element={<DepthPressurePanel />} />
           <Route path="/notifications" element={<NotificationCenter />} />
           <Route path="/insights" element={<InsightsPanel />} />
           <Route path="/telegram" element={<TelegramPanel />} />
-          <Route path="/settings" element={<SettingsPanel user={user} />} />
-          <Route path="*" element={<Navigate to="/alerts" replace />} />
+          <Route path="/settings" element={<SettingsPanel user={user} onUserUpdate={onUserUpdate} />} />
+          <Route path="*" element={<Navigate to="/portfolio" replace />} />
         </Routes>
       </main>
     </div>
@@ -120,6 +140,7 @@ function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [wsConnected, setWsConnected] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const token = useMemo(() => getAuthToken(), [user]);
@@ -174,19 +195,45 @@ function App() {
 
       socket.onopen = () => {
         reconnectAttemptRef.current = 0;
+        setWsConnected(true);
       };
 
       socket.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data) as { event: string; data: NotificationItem };
+          const message = JSON.parse(event.data) as {
+            event: string;
+            data: NotificationItem | DepthPressureSnapshot | { phoneNumber?: string };
+          };
+
+          if (message.event === 'connection.ready') {
+            setWsConnected(true);
+            return;
+          }
+
           if (message.event === 'notification.created' && message.data) {
+            const notification = message.data as NotificationItem;
             setUnreadCount((count) => count + 1);
-            const toastId = `${message.data.id}-${Date.now()}`;
+            const toastId = `${notification.id}-${Date.now()}`;
             setToasts((existing) => [
               {
                 id: toastId,
-                title: message.data.title,
-                message: message.data.message,
+                title: notification.title,
+                message: notification.message,
+              },
+              ...existing,
+            ].slice(0, 4));
+            return;
+          }
+
+          if (message.event === 'depth_pressure.updated' && message.data) {
+            const depthUpdate = message.data as DepthPressureSnapshot;
+            window.dispatchEvent(new CustomEvent('dse:depth-pressure-updated', { detail: depthUpdate }));
+            const toastId = `${depthUpdate.symbol}-depth-${Date.now()}`;
+            setToasts((existing) => [
+              {
+                id: toastId,
+                title: `${depthUpdate.symbol} depth update`,
+                message: `${depthUpdate.signal} at ratio ${depthUpdate.buyPressureRatio.toFixed(2)}`,
               },
               ...existing,
             ].slice(0, 4));
@@ -197,6 +244,7 @@ function App() {
       };
 
       socket.onclose = () => {
+        setWsConnected(false);
         if (!token || !user?.notificationSettings.websocketEnabled) return;
         if (reconnectAttemptRef.current >= 5) return;
 
@@ -232,7 +280,7 @@ function App() {
   const handleAuthSuccess = async (nextUser: AuthUser) => {
     setUser(nextUser);
     await refreshUnreadCount();
-    navigate('/alerts');
+    navigate('/live');
   };
 
   const handleLogout = async () => {
@@ -262,7 +310,13 @@ function App() {
   return (
     <>
       {user ? (
-        <ProtectedLayout user={user} unreadCount={unreadCount} onLogout={handleLogout} />
+        <ProtectedLayout
+          user={user}
+          unreadCount={unreadCount}
+          wsConnected={wsConnected}
+          onLogout={handleLogout}
+          onUserUpdate={setUser}
+        />
       ) : (
         <Routes>
           <Route path="/auth" element={<AuthPage onAuthenticated={handleAuthSuccess} authError={null} />} />

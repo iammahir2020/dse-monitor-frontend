@@ -9,6 +9,40 @@ import {
   type NotificationStatus,
 } from '../services/api';
 
+const formatNotificationType = (type: NotificationItem['type']) =>
+  type.replace(/_/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase());
+
+const getNotificationDetail = (notification: NotificationItem) => {
+  const payload = notification.payload || {};
+
+  if (notification.type === 'order_book_pressure') {
+    const ratio = typeof payload.buyPressureRatio === 'number' ? payload.buyPressureRatio.toFixed(2) : null;
+    return ratio ? `Buy pressure ratio ${ratio}` : 'Order-book pressure update';
+  }
+
+  if (notification.type === 'signal_pulse') {
+    const signalKind = typeof payload.signal === 'string' ? payload.signal.replace(/_/g, ' ') : null;
+    return signalKind ? `Signal ${signalKind}` : 'Signal pulse update';
+  }
+
+  if (notification.type === 'relative_volume_trade') {
+    const multiple = typeof payload.relativeVolumeMultiplier === 'number' ? payload.relativeVolumeMultiplier.toFixed(2) : null;
+    return multiple ? `${multiple}x recent average volume` : 'Relative volume spike';
+  }
+
+  if (notification.type === 'high_volume_trade') {
+    const currentVolume = typeof payload.currentVolume === 'number' ? payload.currentVolume.toLocaleString() : null;
+    return currentVolume ? `Current volume ${currentVolume}` : 'High volume trade detected';
+  }
+
+  if (notification.type === 'entry_signal') {
+    const recommendation = typeof payload.recommendation === 'string' ? payload.recommendation.replace(/_/g, ' ') : null;
+    return recommendation ? `Recommendation ${recommendation}` : 'Entry signal available';
+  }
+
+  return null;
+};
+
 export default function NotificationCenter() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [status, setStatus] = useState<NotificationStatus | 'all'>('all');
@@ -98,23 +132,27 @@ export default function NotificationCenter() {
       {!loading && notifications.length === 0 && <p>No notifications found.</p>}
 
       <div className="notification-list">
-        {notifications.map((notification) => (
-          <article key={notification.id} className={`notification-item ${notification.status}`}>
-            <header>
-              <h4>{notification.title}</h4>
-              <time>{new Date(notification.createdAt).toLocaleString()}</time>
-            </header>
-            <p>{notification.message}</p>
-            <div className="notification-meta">
-              {notification.symbol && <span>{notification.symbol}</span>}
-              <span>{notification.type}</span>
-              {notification.status === 'unread' && (
-                <button onClick={() => void handleReadOne(notification.id)}>Mark read</button>
-              )}
-              <button onClick={() => void handleDeleteOne(notification.id)}>Delete</button>
-            </div>
-          </article>
-        ))}
+        {notifications.map((notification) => {
+          const detail = getNotificationDetail(notification);
+          return (
+            <article key={notification.id} className={`notification-item ${notification.status}`}>
+              <header>
+                <h4>{notification.title}</h4>
+                <time>{new Date(notification.createdAt).toLocaleString()}</time>
+              </header>
+              <p>{notification.message}</p>
+              {detail && <p className="panel__hint">{detail}</p>}
+              <div className="notification-meta">
+                {notification.symbol && <span>{notification.symbol}</span>}
+                <span>{formatNotificationType(notification.type)}</span>
+                {notification.status === 'unread' && (
+                  <button onClick={() => void handleReadOne(notification.id)}>Mark read</button>
+                )}
+                <button onClick={() => void handleDeleteOne(notification.id)}>Delete</button>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
